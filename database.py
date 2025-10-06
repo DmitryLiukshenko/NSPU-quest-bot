@@ -1,0 +1,45 @@
+import aiosqlite
+
+DB_NAME = "database.db"
+
+async def init_db():
+    async with aiosqlite.connect(DB_NAME) as db:
+        await db.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                user_id INTEGER PRIMARY KEY,
+                username TEXT
+            )
+        """)
+        await db.execute("""
+            CREATE TABLE IF NOT EXISTS progress (
+                user_id INTEGER,
+                task_id TEXT,
+                completed INTEGER DEFAULT 0,
+                FOREIGN KEY(user_id) REFERENCES users(user_id)
+            )
+        """)
+        await db.commit()
+
+async def add_user(user_id: int, username: str):
+    async with aiosqlite.connect(DB_NAME) as db:
+        await db.execute(
+            "INSERT OR IGNORE INTO users (user_id, username) VALUES (?, ?)",
+            (user_id, username)
+        )
+        await db.commit()
+
+async def mark_task_done(user_id: int, task_id: str):
+    async with aiosqlite.connect(DB_NAME) as db:
+        await db.execute("""
+            INSERT OR REPLACE INTO progress (user_id, task_id, completed)
+            VALUES (?, ?, 1)
+        """, (user_id, task_id))
+        await db.commit()
+
+async def check_task_done(user_id: int, task_id: str) -> bool:
+    async with aiosqlite.connect(DB_NAME) as db:
+        async with db.execute("""
+            SELECT completed FROM progress WHERE user_id = ? AND task_id = ?
+        """, (user_id, task_id)) as cursor:
+            row = await cursor.fetchone()
+            return bool(row and row[0] == 1)
