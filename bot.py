@@ -79,7 +79,7 @@ async def photo_handler(message: types.Message):
     percent = int((completed / total_tasks) * 100)
     filled_blocks = int(percent / 10)
     empty_blocks = 10 - filled_blocks
-    progress_bar = "🟦" * filled_blocks + "⬜" * empty_blocks
+    progress_bar = "🟧" * filled_blocks + "⬜" * empty_blocks
 
     lines = []
     for t_id, task_data in TASKS.items():
