@@ -36,6 +36,20 @@ async def start_handler(message: types.Message, command: CommandObject):
         )
 
 
+@dp.message(Command("help"))
+async def help_command(message: types.Message):
+    text = (
+        "📘 <b>Доступные команды:</b>\n\n"
+        "🏁 /start — начать квест или активировать задание через QR-код\n"
+        "📷 Отправить фото — выполнить задание\n"
+        "❌ /cancel — отменить текущее задание\n"
+        "📊 /progress — посмотреть свой прогресс\n"
+        "💬 /help — показать это сообщение\n\n"
+        "🚀 Сканируй QR-коды, выполняй задания и открывай НГПУ с новой стороны!"
+    )
+    await message.answer(text, parse_mode="HTML")
+
+
 @dp.message(F.photo)
 async def photo_handler(message: types.Message):
     user_id = message.from_user.id
@@ -194,4 +208,6 @@ async def main():
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
+    import os
+    port = int(os.environ.get("PORT", 5000))  # для Render
     asyncio.run(main())

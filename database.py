@@ -15,10 +15,12 @@ async def init_db():
                 user_id INTEGER,
                 task_id TEXT,
                 completed INTEGER DEFAULT 0,
-                FOREIGN KEY(user_id) REFERENCES users(user_id)
+                FOREIGN KEY(user_id) REFERENCES users(user_id),
+                UNIQUE(user_id, task_id)
             )
         """)
         await db.commit()
+
 
 async def add_user(user_id: int, username: str):
     async with aiosqlite.connect(DB_NAME) as db:
@@ -31,10 +33,13 @@ async def add_user(user_id: int, username: str):
 async def mark_task_done(user_id: int, task_id: str):
     async with aiosqlite.connect(DB_NAME) as db:
         await db.execute("""
-            INSERT OR REPLACE INTO progress (user_id, task_id, completed)
+            INSERT INTO progress (user_id, task_id, completed)
             VALUES (?, ?, 1)
+            ON CONFLICT(user_id, task_id)
+            DO UPDATE SET completed = 1
         """, (user_id, task_id))
         await db.commit()
+
 
 async def check_task_done(user_id: int, task_id: str) -> bool:
     async with aiosqlite.connect(DB_NAME) as db:

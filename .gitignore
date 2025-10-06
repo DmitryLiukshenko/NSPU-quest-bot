@@ -1,4 +1,6 @@
+venv/
 __pycache__/
-qr_codes/
-database.db
 photos/
+.env
+*.db
+*.png
