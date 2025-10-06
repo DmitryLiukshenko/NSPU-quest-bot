@@ -43,3 +43,12 @@ async def check_task_done(user_id: int, task_id: str) -> bool:
         """, (user_id, task_id)) as cursor:
             row = await cursor.fetchone()
             return bool(row and row[0] == 1)
+
+async def get_user_progress(user_id: int) -> dict:
+    """Возвращает словарь {task_id: completed}"""
+    async with aiosqlite.connect(DB_NAME) as db:
+        async with db.execute(
+            "SELECT task_id, completed FROM progress WHERE user_id = ?", (user_id,)
+        ) as cursor:
+            rows = await cursor.fetchall()
+            return {task_id: bool(completed) for task_id, completed in rows}
