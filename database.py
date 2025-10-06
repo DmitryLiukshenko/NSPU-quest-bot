@@ -52,3 +52,14 @@ async def get_user_progress(user_id: int) -> dict:
         ) as cursor:
             rows = await cursor.fetchall()
             return {task_id: bool(completed) for task_id, completed in rows}
+
+async def unmark_task_done(user_id: int, task_id: str):
+    """Отменяет выполнение задания"""
+    async with aiosqlite.connect(DB_NAME) as db:
+        await db.execute("""
+            UPDATE progress
+            SET completed = 0
+            WHERE user_id = ? AND task_id = ?
+        """, (user_id, task_id))
+        await db.commit()
+
